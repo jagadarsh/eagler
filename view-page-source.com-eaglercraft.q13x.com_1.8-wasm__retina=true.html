@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="description" content="Minecraft 1.8.8 (EaglercraftX), in a web browser" />
+	<meta name="keywords" content="eaglercraft, eaglercraftx, minecraft, 1.8, 1.8.8" />
+	<title>Minecraft 1.8.8 (WASM)</title>
+	<meta property="og:locale" content="en-US" />
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="q13x's Eaglercraft Distributions" />
+	<meta property="og:description"
+		content="An online version of EaglercraftX. Play Minecraft 1.8.8 on a Chromebook!" />
+	<link type="image/ico" rel="shortcut icon" href="/favicon.ico" />
+	<!-- BEGIN ORGIN TRIAL TOKENS -->
+	<meta http-equiv="origin-trial"
+		content="AmKk4sK3dhaxcsI74UcksfNf43DYbZ7H4WqFb2FzNPpzhStB8c4fex2xqdwAvn8GMMgLLkXDQGK33UlAGdRFOQsAAAB0eyJvcmlnaW4iOiJodHRwczovL3ExM3guY29tOjQ0MyIsImZlYXR1cmUiOiJXZWJBc3NlbWJseUpTUHJvbWlzZUludGVncmF0aW9uIiwiZXhwaXJ5IjoxNzUzMTQyNDAwLCJpc1N1YmRvbWFpbiI6dHJ1ZX0=">
+	<meta http-equiv="origin-trial"
+		content="A3CslQxt4zihRLBFeFflfTjX0McWZ1o8wifSJLVf1gqvgBjhw58mubR3ehsHBTl8b1Yn9OMRv8XbyLJkOLL9LHcAAAB0eyJvcmlnaW4iOiJodHRwczovL3ExM3guY29tOjQ0MyIsImZlYXR1cmUiOiJXZWJBc3NlbWJseUpTUHJvbWlzZUludGVncmF0aW9uIiwiZXhwaXJ5IjoxNzQ1NDQzOTI5LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=">
+	<!-- END ORGIN TRIAL TOKENS -->
+	<!-- q13x's caching EaglercraftX loader, made with lots of love. <3 -->
+	<script type="text/javascript" src="/lib/launcher.js"></script>
+	<script type="text/javascript" src="/lib/util.js"></script>
+	<script type="text/javascript" src="/lib/proxy-shim.js"></script>
+	<script type="text/javascript" src="/lib/largeEPK.js"></script>
+	<script type="text/javascript" src="/lib/sha256.js"></script>
+	<script type="text/javascript">
+		"use strict";
+		window.addEventListener("load", async () => {
+			if (document.location.href.startsWith("file:")) {
+				alert("HTTP please, do not open this file locally, run a local HTTP server and load it via HTTP");
+			} else {
+				if (!WebAssembly.Suspending) {
+					window.location.href = "./enableJSPIScreen.html";
+				}
+
+				try {
+					checkServiceWorker()
+					let [epk] = await Promise.all([
+						await loadCachedAssetUI("game-assets/meta.json", false)
+					])
+					epk = new Uint8Array(epk);
+					const relayId = Math.floor(Math.random() * 4), element = getCoreElements()
+					const params = {
+						demoMode: false,
+						localesURI: "lang/",
+						worldsDB: "worlds",
+						...(await (await fetch("/list.json")).json())
+					};
+					params.relays[Math.round(Math.random() * (params.relays.length - 1))].primary = true;
+					parseParams(params);
+
+					window.__eaglercraftXLoaderContext = {
+						getEaglercraftXOpts: function () {
+							return params;
+						},
+						getEagRuntimeJSURL: function () {
+							return "eagruntime.js";
+						},
+						getClassesWASMURL: function () {
+							return "classes.wasm";
+						},
+						getClassesDeobfWASMURL: function () {
+							return "classes.wasm-deobfuscator.wasm";
+						},
+						getClassesTEADBGURL: function () {
+							return "classes.wasm.teadbg";
+						},
+						getEPKFiles: function () {
+							return [{
+								name: "assets.epk",
+								path: "",
+								data: epk
+							}];
+						},
+						getRootElement: function () {
+							return document.body;
+						},
+						getMainArgs: function () {
+							return [];
+						},
+						getImageURL: function (idx) {
+							switch (idx) {
+								case 0:
+									return "splash.png";
+								case 1:
+									return "pressAnyKey.png";
+								case 2:
+									return "crashLogo.png";
+								case 3:
+									return "favicon.png";
+								default:
+									return null;
+							}
+						},
+						runMain: function (fn) {
+							setTimeout(fn, 10);
+						}
+					};
+					// this shit took 1 hour to debug
+					document.body.innerHTML = document.body.innerHTML.trim();
+					launch(await (await fetch("./eagruntime.js")).text(), params, getCoreElements(), true)
+				} catch (err) {
+					window.alert("Something went wrong, try clearing your browser cache/data?\n---\n" + err.stack ?? err)
+				}
+			}
+		});
+	</script>
+</head>
+<style id="bodyStyle">
+	body {
+		margin: 0;
+		width: 100vw;
+		height: 100vh;
+		overflow: hidden;
+	}
+</style>
+
+<body id="game_frame">
+	<div style="margin:0px;width:100%;height:100%;font-family:sans-serif;display:flex;align-items:center;user-select:none;"
+		id="loading-div">
+		<div style="margin:auto;text-align:center;">
+			<h2 id="action-block">Checking for updates...</h2>
+			<h2 id="context-block">(this may take a while)</h2>
+			<div style="border:2px solid black;width:100%;height:15px;padding:1px;margin-bottom:20vh;font-family: Arial, sans-serif;font-weight: bold;"
+				hidden="" id="progress-bar-container">
+				<div id="progress-bar" style="background-color:#ff4545;width:0%;height:100%;top:0;"></div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
