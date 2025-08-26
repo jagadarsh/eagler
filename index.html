@@ -1,77 +1,54 @@
 <!DOCTYPE html>
-<html>
-
-<head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<meta name="description" content="Minecraft 1.8.8 (EaglercraftX), in a web browser" />
-	<meta name="keywords" content="eaglercraft, eaglercraftx, minecraft, 1.8, 1.8.8" />
-	<title>Minecraft 1.8.8</title>
-	<meta property="og:locale" content="en-US" />
-	<meta property="og:type" content="website" />
-	<meta property="og:title" content="Minecraft 1.8.8" />
-	<meta property="og:description"
-		content="An online version of EaglercraftX. Play Minecraft 1.8.8 on a Chromebook!" />
-	<link type="image/ico" rel="shortcut icon" href="/favicon.ico" />
-	<!-- q13x's caching EaglercraftX loader, made with lots of love. <3 -->
-	<script type="text/javascript" src="/lib/launcher.js"></script>
-	<script type="text/javascript" src="/lib/util.js"></script>
-	<script type="text/javascript" src="/lib/proxy-shim.js"></script>
-	<script type="text/javascript" src="/lib/largeEPK.js"></script>
-	<script type="text/javascript" src="/lib/sha256.js"></script>
-	<script type="text/javascript">
-		"use strict";
-		window.addEventListener("load", async () => {
-			if (document.location.href.startsWith("file:")) {
-				alert("HTTP please, do not open this file locally, run a local HTTP server and load it via HTTP");
-			} else {
-				try {
-					checkServiceWorker()
-					const [js, epk] = ([
-						await loadCachedAssetUI("javascript/meta.json", false),
-						await loadCachedAssetUI("game-assets/meta.json")
-					])
-					const relayId = Math.floor(Math.random() * 4);
-					const params = {
+<html style="width:100%;height:100%;background-color:black;">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+		<meta name="description" content="Play minecraft 1.12 in your browser" />
+		<meta name="keywords" content="eaglercraft, minecraft, 1.12, 1.12.2" />
+		<title>EaglercraftX 1.12 WASM-GC</title>
+		<meta property="og:locale" content="en-US" />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content="Eaglercraft 1.12 WASM" />
+		<meta property="og:description" content="Play minecraft 1.12 in your browser" />
+		<meta property="og:image" content="favicon.png" />
+		<link type="image/png" rel="shortcut icon" href="favicon.png" />
+		<script type="text/javascript" src="bootstrap.js"></script>
+		<script type="text/javascript">
+			"use strict";
+			window.addEventListener("load", function() {
+				if(window.location.href.indexOf("file:") === 0) {
+					alert("HTTP please, do not open this file locally, run a local HTTP server and load it via HTTP");
+				}else {
+					
+					// %%%%%%%%% launch options %%%%%%%%%%%%
+					
+					var relayId = Math.floor(Math.random() * 3);
+					window.eaglercraftXOpts = {
 						demoMode: false,
 						container: "game_frame",
-						assetsURI: epk,
-						localesURI: "lang/",
+						assetsURI: "assets.epw",
 						worldsDB: "worlds",
-						...(await (await fetch("/list.json")).json())
+						servers: [
+							{ addr: "wss://play.zelz.net", name: "ZelzNet" },
+							{ addr: "wss://mc.arch.lol", name: "ArchMC" },
+							{ addr: "wss://beta.arch.lol", name: "§r §r §r §r §4§lArchMC Beta" }
+    						]
 					};
-					params.relays[Math.round(Math.random() * (params.relays.length - 1))].primary = true;
-					parseParams(params);
-					launch(utf8ToString(js), params)
-				} catch (err) {
-					window.alert("Something went wrong, try clearing your browser cache/data?\n---\n" + err.stack ?? err)
-
+					
+					// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+					
+					var q = window.location.search;
+					if((typeof q === "string") && q[0] === "?" && (typeof window.URLSearchParams !== "undefined")) {
+						q = new window.URLSearchParams(q);
+						var s = q.get("server");
+						if(s) window.eaglercraftXOpts.joinServer = s;
+					}
+					
+					main();
+					
 				}
-			}
-		});
-	</script>
-</head>
-<style id="bodyStyle">
-	body {
-		margin: 0;
-		width: 100vw;
-		height: 100vh;
-		overflow: hidden;
-	}
-</style>
-
-<body id="game_frame">
-	<div style="margin:0px;width:100%;height:100%;font-family:sans-serif;display:flex;align-items:center;user-select:none;"
-		id="loading-div">
-		<div style="margin:auto;text-align:center;">
-			<h2 id="action-block">Checking for updates...</h2>
-			<h2 id="context-block">(this may take a while)</h2>
-			<div style="border:2px solid black;width:100%;height:15px;padding:1px;margin-bottom:20vh;font-family: Arial, sans-serif;font-weight: bold;"
-				hidden="" id="progress-bar-container">
-				<div id="progress-bar" style="background-color:#ff4545;width:0%;height:100%;top:0;"></div>
-			</div>
-		</div>
-	</div>
-</body>
-
+			});
+		</script>
+	</head>
+	<body style="margin:0px;width:100%;height:100%;overflow:hidden;background-color:black;" id="game_frame"></body>
 </html>
